@@ -9,9 +9,6 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - EYE_ENVIRONMENT=development
-    - NVIDIA_VISIBLE_DEVICES=all
-    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    gpus: all
     depends_on:
     - db
     - redis
@@ -39,13 +36,13 @@ services:
     - POSTGRES_PASSWORD=vision
     - POSTGRES_DB=vision
     ports:
-    - 5433:5432
+    - 5433:5433
     volumes:
     - pgdata:/var/lib/postgresql/data
   redis:
     image: redis:7-alpine
     ports:
-    - 6380:6379
+    - 6380:6380
     environment:
     - REDIS_DB=0
   minio:
@@ -76,27 +73,6 @@ services:
     - 9090:9090
     depends_on:
     - backend
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-    - 11434:11434
-    volumes:
-    - ollama_data:/root/.ollama
-    gpus: all
-    environment:
-    - NVIDIA_VISIBLE_DEVICES=all
-    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    - OLLAMA_NUM_GPU=999
-    - OLLAMA_MAX_LOADED_MODELS=1
-    - OLLAMA_FLASH_ATTENTION=true
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            count: all
-            capabilities:
-            - gpu
   worker:
     build:
       context: ./orchestrator
@@ -109,13 +85,19 @@ services:
     depends_on:
     - redis
     - minio
-    gpus: all
     environment:
     - NVIDIA_VISIBLE_DEVICES=all
     - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     - EYE_ENVIRONMENT=development
-
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities:
+            - gpu
 volumes:
   pgdata: {}
   minio_data: {}
-  ollama_data: {}
+  cvat_db_data: {}

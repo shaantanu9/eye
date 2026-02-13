@@ -34,6 +34,8 @@ RUN apt-get update && apt-get install -y \
     libxcb-xkb1 \
     libxkbcommon-x11-0 \
     wget \
+    gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables to disable GUI dependencies
